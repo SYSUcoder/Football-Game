@@ -12,12 +12,12 @@ class BaseGameEntity:
 	nNextValidID = 0
 
 	def __init__(self, nID):
-		self.nID = -1
-		self.nType = -1
-		self.bTag = False
-		self.vPosition = None
-		self.vScale = None
-		self.fBoundingRadius = 0.0
+		self.m_nID = -1
+		self.m_nType = -1
+		self.m_bTag = False
+		self.m_vPosition = None
+		self.m_vScale = Vector2D(1, 1)
+		self.m_fBoundingRadius = 0.0
 
 		self.SetID(nID)
 
@@ -25,8 +25,8 @@ class BaseGameEntity:
 		if nVal < BaseGameEntity.nNextValidID:
 			print "Invalid ID!"
 			return
-		self.nID = nVal
-		BaseGameEntity.nNextValidID = self.nID + 1
+		self.m_nID = nVal
+		BaseGameEntity.nNextValidID = self.m_nID + 1
 
 	def Update(self):
 		return
@@ -50,42 +50,42 @@ class BaseGameEntity:
 		BaseGameEntity.nNextValidID = 0
 
 	def Pos(self):
-		return self.vPosition
+		return self.m_vPosition
 
 	def SetPos(self, vNewPos):
-		self.vPosition = vNewPos
+		self.m_vPosition = vNewPos
 
 	def BRadius(self):
-		return self.fBoundingRadius
+		return self.m_fBoundingRadius
 
 	def SetBRadius(self, fR):
-		self.fBoundingRadius = fR
+		self.m_fBoundingRadius = fR
 
 	def ID(self):
-		return self.nID
+		return self.m_nID
 
 	def IsTagged(self):
-		return self.bTag
+		return self.m_bTag
 
 	def Tag(self):
-		self.bTag = True
+		self.m_bTag = True
 
 	def UnTag(self):
-		self.bTag = False
+		self.m_bTag = False
 
 	def Scale(self):
-		return self.vScale
+		return self.m_vScale
 
 	def SetScaleByVec(self, vVal):
-		self.fBoundingRadius *= MaxOf(vVal.GetX(), vVal.GetY()) / MaxOf(self.vScale.GetX(), self.vScale.GetY())
-		self.vScale = vVal
+		self.m_fBoundingRadius *= MaxOf(vVal.GetX(), vVal.GetY()) / MaxOf(self.m_vScale.GetX(), self.m_vScale.GetY())
+		self.m_vScale = vVal
 
 	def SetScale(self, fVal):
-		self.fBoundingRadius *= fVal / MaxOf(self.vScale.GetX(), self.vScale.GetY())
-		self.vScale = Vector2D(fVal, fVal)
+		self.m_fBoundingRadius *= fVal / MaxOf(self.m_vScale.GetX(), self.m_vScale.GetY())
+		self.m_vScale = Vector2D(fVal, fVal)
 
 	def EntityType(self):
-		return self.nType
+		return self.m_nType
 
 	def SetEntityType(self, nNewType):
-		self.nType = nNewType
+		self.m_nType = nNewType
