@@ -9,6 +9,11 @@ class Data:
 	ON_PLANE = 2
 	PI = 3.14159
 	LEFT_KEEPER_X = 40
+	SMALLESTDELAY = 0.25
+	NUMREGIONSHORIZONTAL = 6
+	NUMREGIONSVERTICAL = 3
+	BLUE = 0
+	RED = 1
 
 class Miner:
 	COMFORTLEVEL = 5
@@ -27,3 +32,14 @@ class Filename:
 	RED_TEAM_MEMBER_FILENAME = "Football/image/red_team.png"
 	BLUE_TEAM_MEMBER_FILENAME = "Football/image/blue_team.png"
 	FOOTBALL_FILENAME = "Football/image/football.png"
+
+class Params:
+	FRICTION = -0.015
+	PLAYERKICKINGACCURACY = 0.99
+	GOALWIDTH = 100
+	BALLSIZE = 5.0
+	BALLMASS = 1.0
+	
+class RegionData:
+	HALFSIZE = 0
+	NORMAL = 1
