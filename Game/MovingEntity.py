@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 import math
+import copy
 from V2D.Vector2D import *
 from Game.BaseGameEntity import BaseGameEntity
 
@@ -20,9 +21,9 @@ class MovingEntity(BaseGameEntity):
 		self.SetBRadius(fRadius)
 		self.SetScaleByVec(vScale)
 
-		self.m_vVelocity = vVelocity
+		self.m_vVelocity = copy.deepcopy(vVelocity)
 		self.m_fMaxSpeed = fMaxSpeed
-		self.m_vHeading = vHeading
+		self.m_vHeading = copy.deepcopy(vHeading)
 		self.m_vSide = vHeading.Perp()
 		self.m_fMass = fMass
 		self.m_fMaxTurnRate = fTurnRate
@@ -32,7 +33,7 @@ class MovingEntity(BaseGameEntity):
 		return self.m_vVelocity
 
 	def SetVelocity(self, vNewVel):
-		self.m_vVelocity = vNewVel
+		self.m_vVelocity = copy.deepcopy(vNewVel)
 
 	def Mass(self):
 		return self.m_fMass
@@ -69,7 +70,7 @@ class MovingEntity(BaseGameEntity):
 			print "vNewHeading is not valid!\n"
 			return
 
-		self.m_vHeading = vNewHeading
+		self.m_vHeading = copy.deepcopy(vNewHeading)
 		self.m_vSide = self.m_vHeading.Perp()
 
 	def RotateHeadingToFacePosition(self, vTarget):

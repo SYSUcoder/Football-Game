@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
+
 import math
+import copy
 from Data import Data
 
 class Vector2D:
@@ -119,7 +121,7 @@ class Vector2D:
 
 
 def Vec2DNormalize(vVec):
-	vNewVec = vVec
+	vNewVec = copy.deepcopy(vVec)
 	fVecLength = vVec.Length()
 	if fVecLength > Data.MINDOUBLE:
 		vNewVec.SetX(vVec.GetX() / fVecLength)

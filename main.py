@@ -28,9 +28,12 @@ if __name__ == '__main__':
 
 		# 定义初始位置		
 		oScreen.blit(oBackground, (0, 0))
-		oScreen.blit(oRedTeam, (Data.LEFT_KEEPER_X, fBackgroundHeight / 2))
-		oScreen.blit(oBlueTeam, (fBackgroundWidth - Data.LEFT_KEEPER_X, fBackgroundHeight /  2))
-		oScreen.blit(oFootball, (fBackgroundWidth / 2, fBackgroundHeight / 2))
+		oScreen.blit(oRedTeam, (Data.LEFT_KEEPER_X - oRedTeam.get_width() / 2, 
+					            fBackgroundHeight / 2 - oRedTeam.get_height() / 2))
+		oScreen.blit(oBlueTeam, (fBackgroundWidth - Data.LEFT_KEEPER_X - oRedTeam.get_width() / 2,
+								 fBackgroundHeight /  2 - oBlueTeam.get_height() / 2))
+		oScreen.blit(oFootball, (fBackgroundWidth / 2 - oFootball.get_width() / 2,
+								 fBackgroundHeight / 2 - oFootball.get_height() / 2))
 
 		x, y = pygame.mouse.get_pos()
 		print (x, y)

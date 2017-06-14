@@ -1,4 +1,6 @@
 # -*- coding: UTF-8 -*-
+
+import copy
 from Data import Data
 from V2D.Vector2D import *
 
@@ -53,7 +55,7 @@ class BaseGameEntity:
 		return self.m_vPosition
 
 	def SetPos(self, vNewPos):
-		self.m_vPosition = vNewPos
+		self.m_vPosition = copy.deepcopy(vNewPos)
 
 	def BRadius(self):
 		return self.m_fBoundingRadius
@@ -78,7 +80,7 @@ class BaseGameEntity:
 
 	def SetScaleByVec(self, vVal):
 		self.m_fBoundingRadius *= MaxOf(vVal.GetX(), vVal.GetY()) / MaxOf(self.m_vScale.GetX(), self.m_vScale.GetY())
-		self.m_vScale = vVal
+		self.m_vScale = copy.deepcopy(vVal)
 
 	def SetScale(self, fVal):
 		self.m_fBoundingRadius *= fVal / MaxOf(self.m_vScale.GetX(), self.m_vScale.GetY())
