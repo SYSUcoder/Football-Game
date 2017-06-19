@@ -19,6 +19,7 @@ class Singleton(object):
 
 class Attacking(State, Singleton):
 	def __init__(self):
+		State.__init__(self)
 		return
 
 	def Enter(self, oTeam):
@@ -30,11 +31,11 @@ class Attacking(State, Singleton):
 		else:
 			ChangePlayerHomeRegions(oTeam, lRedRegions)
 
-		oTeam.UpdateTargetsOfWaitingPlayers() # SoccerTeam暂未实现
+		oTeam.UpdateTargetsOfWaitingPlayers()
 
 	def Execute(self, oTeam):
 		if not oTeam.InControl():
-			oTeam.GetFSM().ChangeState(oDefending)
+			oTeam.GetFSM().ChangeState(Defending())
 			return
 
 		oTeam.DetermineBestSupportingPosition()
@@ -47,6 +48,7 @@ class Attacking(State, Singleton):
 
 class Defending(State, Singleton):
 	def __init__(self):
+		State.__init__(self)
 		return
 
 	def Enter(self, oTeam):
@@ -62,7 +64,7 @@ class Defending(State, Singleton):
 
 	def Execute(self, oTeam):
 		if oTeam.InControl():
-			oTeam.GetFSM().ChangeState(oAttacking)
+			oTeam.GetFSM().ChangeState(Attacking())
 			return
 
 	def Exit(self, oTeam):
@@ -73,6 +75,7 @@ class Defending(State, Singleton):
 
 class PrepareForKickOff(State, Singleton):
 	def __init__(self):
+		State.__init__(self)
 		return
 
 	def Enter(self, oTeam):
@@ -85,7 +88,7 @@ class PrepareForKickOff(State, Singleton):
 
 	def Execute(self, oTeam):
 		if oTeam.AllPlayersAtHome() and oTeam.Opponents().AllPlayersAtHome():
-			oTeam.GetFSM().ChangeState(oDefending)
+			oTeam.GetFSM().ChangeState(Defending())
 
 	def Exit(self, oTeam):
 		oTeam.Pitch().SetGameOn()

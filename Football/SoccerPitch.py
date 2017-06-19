@@ -6,6 +6,9 @@ from Game.Region import *
 from Data import *
 from Football.Goal import *
 from Football.SoccerBall import *
+from Football.SoccerTeam import *
+from misc.autolist import *
+from Football.TeamStates import *
 
 class SoccerPitch:
 	nTick = 0
@@ -20,9 +23,10 @@ class SoccerPitch:
 		self.m_lRegions = [None] * (Data.NUMREGIONSHORIZONTAL * Data.NUMREGIONSVERTICAL)
 		self.m_lWalls = []
 		
+		
 		self.m_oPlayingArea = Region(20, 20, nCxClient - 20, nCyClient - 20)
-		self.CreateRegions(PlayingArea().Width() / float(Data.NUMREGIONSHORIZONTAL),
-			               PlayingArea().Height() / float(Data.NUMREGIONSVERTICAL)
+		self.CreateRegions(self.PlayingArea().Width() / float(Data.NUMREGIONSHORIZONTAL),
+			               self.PlayingArea().Height() / float(Data.NUMREGIONSVERTICAL)
 			              )
 
 		self.m_oRedGoal = Goal(Vector2D(self.m_oPlayingArea.Left(), (nCyClient - Params.GOALWIDTH) / 2),
@@ -41,9 +45,8 @@ class SoccerPitch:
 							      self.m_lWalls
 			                     )
 
-		# SoccerTeam暂未实现
-		self.m_oRedTeam = SoccerTeam(self.m_oRedGoal, m_oBlueGoal, self, Data.RED)
-		self.m_oBlueTeam = SoccerTeam(self.m_oBlueGoal, m_oRedGoal, self, Data.BLUE)
+		self.m_oRedTeam = SoccerTeam(self.m_oRedGoal, self.m_oBlueGoal, self, Data.RED)
+		self.m_oBlueTeam = SoccerTeam(self.m_oBlueGoal, self.m_oRedGoal, self, Data.BLUE)
 
 		self.m_oRedTeam.SetOpponents(self.m_oBlueTeam)
 		self.m_oBlueTeam.SetOpponents(self.m_oRedTeam)
@@ -58,7 +61,7 @@ class SoccerPitch:
 		self.m_lWalls.append(Wall2D(vTopLeft, vTopRight) )
 		self.m_lWalls.append(Wall2D(vTopRight, self.m_oBlueGoal.LeftPost()) )
 		self.m_lWalls.append(Wall2D(self.m_oBlueGoal.RightPost(), vBottomRight) )
-		self.m_lWalls.append(Wall2D(self.vBottomRight, vBottomLeft) )
+		self.m_lWalls.append(Wall2D(vBottomRight, vBottomLeft) )
 
 	def Update(self):
 		if self.m_bPaused:
@@ -72,20 +75,26 @@ class SoccerPitch:
 			self.m_bGameOn = False
 			self.m_oBall.PlaceAtPosition(Vector2D(self.m_nCxClient / 2.0, self.m_nCyClient / 2.0) )
 
-			# 暂未实现
-			self.m_oRedTeam.GetFSM().ChangeState()
-			self.m_oBlueTeam.GetFSM().ChangeState()
+			self.m_oRedTeam.GetFSM().ChangeState(PrepareForKickOff())
+			self.m_oBlueTeam.GetFSM().ChangeState(PrepareForKickOff())
+
+		# debug
+		lMembers =  AutoList.GetAllMembers()
+		for oMember in lMembers:
+			print "Player", oMember.ID(), ", Position:",
+			oMember.Pos().Print()
 
 	def CreateRegions(self, fWidth, fHeight):
 		nIdx = len(self.m_lRegions) - 1
 		for nCol in xrange(Data.NUMREGIONSHORIZONTAL):
 			for nRow in xrange(Data.NUMREGIONSVERTICAL):
-				self.m_lRegions[nIdx--] = Region(PlayingArea().Left() + nCol*fWidth,
-												 PlayingArea().Top() + nRow*fHeight,
-                                                 PlayingArea().Left() + (nCol + 1)*fWidth,
-                                                 PlayingArea().Top() + (nRow + 1)*fHeight,
+				self.m_lRegions[nIdx] = Region(self.PlayingArea().Left() + nCol*fWidth,
+												 self.PlayingArea().Top() + nRow*fHeight,
+                                                 self.PlayingArea().Left() + (nCol + 1)*fWidth,
+                                                 self.PlayingArea().Top() + (nRow + 1)*fHeight,
                                                  nIdx
 												)
+				nIdx -= 1
 
 	def Render(self):
 		return
@@ -119,7 +128,7 @@ class SoccerPitch:
 
 	def GetRegionFromIndex(self, nIdx):
 		if not( nIdx >= 0 and nIdx < len(self.m_lRegions)):
-			print "Region index wrong!\n"
+			print "Region index wrong!"
 			return
 		return self.m_lRegions[nIdx]
 

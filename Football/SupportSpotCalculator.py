@@ -44,7 +44,7 @@ class SupportSpotCalculator:
 		fBestScoreSoFar = 0.0
 
 		for curSpot in self.m_lSpots:
-			curSpot.self.m_fScore = 1.0
+			curSpot.m_fScore = 1.0
 			if self.m_oTeam.isPassSafeFromAllOpponents(self.m_oTeam.ControllingPlayer().Pos(),
 				                                       curSpot.m_vPos,
 				                                       None,

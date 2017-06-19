@@ -4,19 +4,14 @@ import math
 import copy
 from V2D.Vector2D import *
 from Game.BaseGameEntity import BaseGameEntity
-
-def Clamp(fDot, nMin, nMax):
-	if fDot < nMin:
-		return nMin
-	elif fDot > nMax:
-		return nMax
-	else:
-		return fDot
+from misc.utils import *
+from V2D.C2DMatrix import *
 
 class MovingEntity(BaseGameEntity):
 	def __init__(self, vPosition, fRadius, vVelocity, fMaxSpeed, vHeading,
 		               fMass, vScale, fTurnRate, fMaxForce):
 		BaseGameEntity.__init__(self, BaseGameEntity.nNextValidID)
+		
 		self.SetPos(vPosition)
 		self.SetBRadius(fRadius)
 		self.SetScaleByVec(vScale)

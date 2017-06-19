@@ -4,11 +4,12 @@ import math
 from Data import Data
 
 class Telegram:
-	def __init__(self, fTime = -1, nSender = -1, nReceiver = -1, nMsg = -1):
+	def __init__(self, fTime = -1, nSender = -1, nReceiver = -1, nMsg = -1, oInfo = None):
 		self.m_fDispatchTime = fTime
 		self.m_nSender = nSender
 		self.m_nReceiver = nReceiver
 		self.m_nMsg = nMsg
+		self.m_oInfo = oInfo
 
 	def DispatchTime(self):
 		return self.m_fDispatchTime
@@ -21,6 +22,9 @@ class Telegram:
 
 	def Msg(self):
 		return self.m_nMsg
+
+	def Info(self):
+		return self.m_oInfo
 
 	def Equal(self, tT2):
 		return ( math.fabs(self.m_fDispatchTime - tT2.DispatchTime()) < Data.SMALLESTDELAY

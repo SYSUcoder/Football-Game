@@ -5,7 +5,7 @@ from V2D.Vector2D import *
 from V2D.C2DMatrix import C2DMatrix
 
 def WorldTransformWithScale(lPoints, vPos, vForward, vSide, vScale):
-	lTranVector2Ds = copy.deepcopy(lPoints)
+	lTranVector2Ds = lPoints
 	mMatTransform = C2DMatrix()
 	if vScale.GetX() != 1.0 or vScale.GetY() != 1.0:
 		mMatTransform.Scale(vScale.GetX(), vScale.GetY())
@@ -15,7 +15,7 @@ def WorldTransformWithScale(lPoints, vPos, vForward, vSide, vScale):
 	return lTranVector2Ds
 
 def WorldTransform(lPoints, vPos, vForward, vSide):
-	lTranVector2Ds = copy.deepcopy(lPoints)
+	lTranVector2Ds = lPoints
 	mMatTransform = C2DMatrix()
 	mMatTransform.Rotate(vForward, vSide)
 	mMatTransform.Translate(vPos.GetX(), vPos.GetY())
@@ -23,7 +23,7 @@ def WorldTransform(lPoints, vPos, vForward, vSide):
 	return lTranVector2Ds
 
 def PointToWorldSpace(vPoint, vAgentHeading, vAgentSide, vAgentPosition):
-	vTransPoint = copy.deepcopy(vPoint)
+	vTransPoint = vPoint
 	mMatTransform = C2DMatrix()
 	mMatTransform.Rotate(vAgentHeading, vAgentSide)
 	mMatTransform.Translate(vAgentPosition.GetX(), vAgentPosition.GetY())
@@ -31,14 +31,14 @@ def PointToWorldSpace(vPoint, vAgentHeading, vAgentSide, vAgentPosition):
 	return vTransPoint
 
 def VectorToWorldSpace(vVec, vAgentHeading, vAgentSide):
-	vTransVec = copy.deepcopy(vVec)
+	vTransVec = vVec
 	mMatTransform = C2DMatrix()
 	mMatTransform.Rotate(vAgentHeading, vAgentSide)
 	vTransVec = mMatTransform.TransformVector2D(vTransVec)
 	return vTransVec
 
 def PointToLocalSpace(vPoint, vAgentHeading, vAgentSide, vAgentPosition):
-	vTransPoint = copy.deepcopy(vPoint)
+	vTransPoint = vPoint
 	mMatTransform = C2DMatrix()
 	fTx = -vAgentPosition.Dot(vAgentHeading)
 	fTy = -vAgentPosition.Dot(vAgentSide)
@@ -55,7 +55,7 @@ def PointToLocalSpace(vPoint, vAgentHeading, vAgentSide, vAgentPosition):
 	return vTransPoint
 
 def VectorToLocalSpace(vVec, vAgentHeading, vAgentSide):
-	vTransPoint = copy.deepcopy(vVec)
+	vTransPoint = vVec
 	mMatTransform = C2DMatrix()
 
 	lFirstLine = mMatTransform.GetFirstLine()

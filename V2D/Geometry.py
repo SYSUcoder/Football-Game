@@ -47,6 +47,7 @@ def DoRayCircleIntersect(vRayOrigin, vRayHeading, vCircleOrigin, fRadius):
 	return fD < 0.0
 
 def GetTangentPoints(vC, fR, vP, vT1, vT2):
+	# vT1&vT2为传引用
 	vPmC = vP.Minus(vC)
 	fSqrLen = vPmC.LengthSq()
 	fRSqr = fR**2

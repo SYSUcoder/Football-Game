@@ -2,22 +2,23 @@
 
 import copy
 from FSM.State import *
+from Messaging.Telegram import *
 
 class StateMachine:
 	def __init__(self, oOwner):
-		self.m_oOwner = copy.deepcopy(oOwner)
+		self.m_oOwner = oOwner
 		self.m_oCurrentState = None
 		self.m_oPreviousState = None
 		self.m_oGlobalState = None
 
 	def SetCurrentState(self, oS):
-		self.m_oCurrentState = copy.deepcopy(oS)
+		self.m_oCurrentState = oS
 
 	def SetGlobalState(self, oS):
-		self.m_oGlobalState = copy.deepcopy(oS)
+		self.m_oGlobalState = oS
 
 	def SetPreviousState(self, oS):
-		self.m_oPreviousState = copy.deepcopy(oS)
+		self.m_oPreviousState = oS
 
 	def Update(self):
 		if self.m_oGlobalState:
@@ -41,7 +42,7 @@ class StateMachine:
 			return
 		self.m_oPreviousState = self.m_oCurrentState
 		self.m_oCurrentState.Exit(self.m_oOwner)
-		self.m_oCurrentState = copy.deepcopy(oNewState)
+		self.m_oCurrentState = oNewState
 		self.m_oCurrentState.Enter(self.m_oOwner)
 
 	def RevertToPreviousState(self):

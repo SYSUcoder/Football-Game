@@ -18,3 +18,19 @@ def RandomClamped():
 def RandInRange(fX, fY):
 	random.seed()
 	return fX + random.random()*(fY - fX)
+
+def RandInt(nX, nY):
+	random.seed()
+	if nY < nX:
+		print "nY must be greater than nX!\n"
+		return None
+
+	return int((nY - nX) * random.random()) + nX
+
+def Clamp(fDot, nMin, nMax):
+	if fDot < nMin:
+		return nMin
+	elif fDot > nMax:
+		return nMax
+	else:
+		return fDot

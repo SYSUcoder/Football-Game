@@ -15,7 +15,7 @@ class Goal:
 
 	def Scored(self, oBall):
 		if LineIntersection2D(oBall.Pos(), oBall.OldPos(), self.m_vLeftPost, self.m_vRightPost):
-			self.m_nNumGoalsScored++
+			self.m_nNumGoalsScored += 1
 			return True
 		return False
 

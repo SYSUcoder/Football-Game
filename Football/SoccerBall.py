@@ -15,7 +15,8 @@ class SoccerBall(MovingEntity):
 	def __init__(self, vPos, fBallSize, fMass, lPitchBoundary):
 		MovingEntity.__init__(self, copy.deepcopy(vPos), fBallSize, Vector2D(0, 0), -1.0, 
 			                  Vector2D(0, 1), fMass, Vector2D(1.0, 1.0), 0, 0)
-		self.m_lPitchBoundary = copy.deepcopy(lPitchBoundary)
+		
+		self.m_lPitchBoundary = lPitchBoundary
 
 	def Update(self):
 		self.m_vOldPos = copy.deepcopy(self.Pos())
@@ -72,7 +73,7 @@ class SoccerBall(MovingEntity):
 		fDistToIntersection = 99999999.0
 
 		for w in xrange(len(lWalls)):
-			vThisCollisionPoint = self.Pos().Minus( (lWalls[w].Normal().Multiply(BRadius()) ) )
+			vThisCollisionPoint = self.Pos().Minus( (lWalls[w].Normal().Multiply(self.BRadius()) ) )
 
 			if WhereIsPoint(vThisCollisionPoint, lWalls[w].From(), lWalls[w].Normal()) == Data.PLANE_BACKSIDE:
 				fDistToWall = DistanceToRayPlaneIntersection(vThisCollisionPoint, lWalls[w].Normal(),
