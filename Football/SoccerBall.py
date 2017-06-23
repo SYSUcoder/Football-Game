@@ -10,6 +10,7 @@ from Data import *
 from Messaging.Telegram import *
 from misc.utils import *
 from V2D.Transformations import *
+from Football.SpriteRender import *
 
 class SoccerBall(MovingEntity):
 	def __init__(self, vPos, fBallSize, fMass, lPitchBoundary):
@@ -23,12 +24,19 @@ class SoccerBall(MovingEntity):
 		self.TestCollisionWithWalls(self.m_lPitchBoundary)
 
 		if self.Velocity().LengthSq() > Params.FRICTION**2:
+			print "move!!!!"
 			self.SetVelocity(self.Velocity().Plus(Vec2DNormalize(self.Velocity()).Multiply(Params.FRICTION) ))
 			self.SetPos(self.Pos().Plus(self.Velocity()) )
 			self.SetHeading(Vec2DNormalize(self.Velocity()) )
 
+		# print "Ball's Velocity:", self.Velocity().TranslateToTuple()
+
+		self.Render()
+
 	def Render(self):
-		return
+		oScreen = SpriteRender.dRenderDict["Screen"]
+		oFootball = SpriteRender.dRenderDict["Football"]
+		oScreen.blit(oFootball, self.Pos().TranslateToTuple())
 
 	def HandleMessage(self, tMsg):
 		return False
@@ -39,21 +47,28 @@ class SoccerBall(MovingEntity):
 		vAcceleration = (vTemp.Multiply(fForce)).Divide(self.Mass())
 		self.SetVelocity(vAcceleration)
 
+		# debug
+		'''
+		print "======================="
+		print "Direction:", vTemp.TranslateToTuple(), "Force:", fForce, "Mass:", self.Mass()
+		print "======================="
+		'''
+
 	def TimeToCoverDistance(self, vFrom, vTo, fForce):
 		fSpeed = fForce / self.Mass()
 		fDistanceToCover = Vec2DDistance(vFrom, vTo)
-		fTerm = fSpeed**2 + 2.0*fDistanceToCover*Data.FRICTION
+		fTerm = fSpeed**2 + 2.0*fDistanceToCover*Params.FRICTION
 
 		if fTerm <= 0.0:
 			return -1.0
 
 		fV = math.sqrt(fTerm)
-		return (fV - fSpeed) / Data.FRICTION
+		return (fV - fSpeed) / Params.FRICTION
 
 	def FuturePosition(self, fTime):
 		vUt = self.Velocity().Multiply(fTime)
-		fHalfAtSquared = 0.5 * Data.FRICTION * fTime * fTime
-		vScalarToVector = fHalfAtSquared * Vec2DNormalize(self.Velocity())
+		fHalfAtSquared = 0.5 * Params.FRICTION * fTime * fTime
+		vScalarToVector = Vec2DNormalize(self.Velocity()).Multiply(fHalfAtSquared)
 		return (self.Pos().Plus(vUt) ).Plus(vScalarToVector)
 
 	def Trap(self):
@@ -104,5 +119,5 @@ class SoccerBall(MovingEntity):
 def AddNoiseToKick(vBallPos, vBallTarget):
 	fDisplacement = (Data.PI - Data.PI*Params.PLAYERKICKINGACCURACY) * RandomClamped()
 	vToTarget = vBallTarget.Minus(vBallPos)
-	Vec2DRotateAroundOrigin(vToTarget, fDisplacement)
+	vToTarget = Vec2DRotateAroundOrigin(vToTarget, fDisplacement)
 	return vToTarget.Plus(vBallPos)

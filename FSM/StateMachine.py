@@ -37,9 +37,8 @@ class StateMachine:
 		return False
 
 	def ChangeState(self, oNewState):
-		if not oNewState:
-			print "NewState is none!\n"
-			return
+		assert oNewState
+
 		self.m_oPreviousState = self.m_oCurrentState
 		self.m_oCurrentState.Exit(self.m_oOwner)
 		self.m_oCurrentState = oNewState

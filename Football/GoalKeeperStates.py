@@ -119,11 +119,15 @@ class PutBallBackInPlay(State, Singleton):
 		oKeeper.Team().ReturnAllFieldPlayersToHome()
 
 	def Execute(self, oKeeper):
-		oReceiver = None
 		vBallTarget = Vector2D()
 
-		if oKeeper.Team().FindPass(oKeeper, oReceiver, vBallTarget,
-			                       Params.MAXPASSINGFORCE, Params.GOALKEEPERMINPASSDISTANCE):
+		tReceiverAndTarget = oKeeper.Team().FindPass(oKeeper,
+			                       Params.MAXPASSINGFORCE, Params.GOALKEEPERMINPASSDISTANCE)
+		
+		if tReceiverAndTarget:
+			oReceiver = tReceiverAndTarget[0]
+			vBallTarget = tReceiverAndTarget[1]
+
 			oKeeper.Ball().Kick(Vec2DNormalize(vBallTarget.Minus(oKeeper.Ball().Pos()) ),
 			                    Params.MAXPASSINGFORCE)
 

@@ -61,18 +61,20 @@ class MovingEntity(BaseGameEntity):
 		return self.m_vHeading
 
 	def SetHeading(self, vNewHeading):
-		if (vNewHeading.LengthSq() - 1.0) < 0.00001:
-			print "vNewHeading is not valid!\n"
-			return
+		assert (vNewHeading.LengthSq() - 1.0) < 0.00001
 
 		self.m_vHeading = copy.deepcopy(vNewHeading)
 		self.m_vSide = self.m_vHeading.Perp()
 
 	def RotateHeadingToFacePosition(self, vTarget):
+		# c++ acos()返回角度值, python acos()返回弧度值
 		vToTarget = Vec2DNormalize(vTarget.Minus(self.Pos() ))
 		fDot = self.m_vHeading.Dot(vToTarget)
 		fDot = Clamp(fDot, -1, 1)
-		fAngle = math.acos(fDot)
+		# 反三角函数返回的是弧度
+		fRadian = math.acos(fDot)
+		# 转为角度
+		fAngle = fRadian / math.pi * 180
 
 		if fAngle < 0.00001:
 			return True
@@ -82,9 +84,11 @@ class MovingEntity(BaseGameEntity):
 
 		RotationMatrix = C2DMatrix()
 		RotationMatrix.Rotate(fAngle * self.m_vHeading.Sign(vToTarget))
-		RotationMatrix.TransformVector2D(self.m_vHeading)
-		RotationMatrix.TransformVector2D(self.m_vVelocity)
+		'''
+		self.m_vHeading = RotationMatrix.TransformVector2D(self.m_vHeading)
+		self.m_vVelocity = RotationMatrix.TransformVector2D(self.m_vVelocity)
 		self.m_vSide = self.m_vHeading.Perp()
+		'''
 		return False
 
 	def MaxTurnRate(self):

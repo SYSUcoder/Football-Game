@@ -14,18 +14,21 @@ class Singleton(object):
         return cls._instance
 
 class MessageDispatcher(Singleton):
-	def __init__(self, fDelay, nSender, nReceiver, nMsg, oAdditionalInfo = None):
+	def __init__(self):
+		return
+
+	def DispatchMsg(self, fDelay, nSender, nReceiver, nMsg, oAdditionalInfo = None):
 		oReceiver = EntityManager().GetEntityFromID(nReceiver)
 		self.m_lPriorityQ = []
 
 		if oReceiver == None:
-			print "Warning! No Receiver with ID of", nReceiver, "found\n"
+			print "Warning! No Receiver with ID of", nReceiver, "found"
 			return
 		tTelegram = Telegram(0, nSender, nReceiver, nMsg, oAdditionalInfo)
 
 		if fDelay <= 0.0:
 			print "Telegram dispatched at time:", FrameCounter().GetCurrentFrame(),
-			print "by", nSender << "for", nReceiver, ". Msg is", nMsg
+			print "by", nSender, "for", nReceiver, ". Msg is", nMsg
 
 			self.Discharge(oReceiver, tTelegram)
 		else:

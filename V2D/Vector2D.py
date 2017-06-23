@@ -116,7 +116,10 @@ class Vector2D:
 
 
 	def Print(self):
-		print "(", self.x, ",", self.y, ")\n"
+		print "(", self.x, ",", self.y, ")\n"\
+
+	def TranslateToTuple(self):
+		return (self.x, self.y)
 
 
 
@@ -156,25 +159,42 @@ def WrapAround(vVec, nMaxX, nMaxY):
 		vVec.SetY(0.0)
 
 def NotInsideRegion(vPos, vTopLeft, vBotRgt):
-	# 源代码有问题
 	return (vPos.GetX() < vTopLeft.GetX()) or (
 		   vPos.GetX() > vBotRgt.GetX())   or (
-		   vPos.GetY() > vTopLeft.GetY())  or (
-		   vPos.GetY() < vBotRgt.GetY())
+		   vPos.GetY() < vTopLeft.GetY())  or (
+		   vPos.GetY() > vBotRgt.GetY())
 
 def InsideRegionByVec(vPos, vTopLeft, vBotRgt):
 	return not( (vPos.GetX() < vTopLeft.GetX()) or (
 		        vPos.GetX() > vBotRgt.GetX())   or (
-		        vPos.GetY() > vTopLeft.GetY())  or (
-		        vPos.GetY() < vBotRgt.GetY()) )
+		        vPos.GetY() < vTopLeft.GetY())  or (
+		        vPos.GetY() > vBotRgt.GetY()) )
 
 def InsideRegion(vPos, nLeft, nTop, nRight, nBottom):
 	return not( (vPos.GetX() < nLeft) or (
 		        vPos.GetX() > nRight) or (
-		        vPos.GetY() > nTop)   or (
-		        vPos.GetY() < nBottom) )
+		        vPos.GetY() < nTop)   or (
+		        vPos.GetY() > nBottom) )
 
 def isSecondInFOVOfFirst(vPosFirst, vFacingFirst, vPosSecond, fFov):
 	vToTarget = Vec2DNormalize(vPosSecond.Minus(vPosFirst))
 	
 	return vFacingFirst.Dot(vToTarget) >= math.cos(fFov / 2.0)
+
+def CalculateAngle(vPos1, vPos2):
+	# vA.Dot(vB) = |vA|*|vB|*cosA
+	# cosA = (x1*x2 + y1*y2) / |vA|*|vB|
+	fX1, fY1 = vPos1.GetX(), vPos1.GetY()
+	fX2, fY2 = vPos2.GetX(), vPos2.GetY()
+
+	fCosA = vPos1.Dot(vPos2) / (vPos1.Length() * vPos2.Length())
+	fCosA = Clamp(fCosA, -1, 1)
+
+	assert fCosA <= 1 and fCosA >= -1
+
+	# 反三角函数返回的是弧度
+	fRadian = math.acos(fCosA)
+	# 转为角度
+	fAngle = fRadian / math.pi * 180
+
+	return fAngle

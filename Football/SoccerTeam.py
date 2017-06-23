@@ -3,6 +3,7 @@
 import copy
 import math
 import random
+import pygame
 from Game.Region import *
 from FSM.StateMachine import *
 from Data import *
@@ -16,6 +17,7 @@ from Game.EntityManager import *
 from Football.GoalKeeper import *
 from Football.FieldPlayer import *
 from Football.PlayerBase import *
+from Football.SpriteRender import *
 
 class SoccerTeam:
 	def __init__(self, oHomeGoal, oOpponentsGoal, oPitch, nTeamColor):
@@ -50,6 +52,8 @@ class SoccerTeam:
 		for oPlayer in self.m_lPlayers:
 			oPlayer.Update()
 
+		self.Render()
+
 	def CalculateClosestPlayerToBall(self):
 		fClosestSoFar = 99999999.0
 		for oPlayer in self.m_lPlayers:
@@ -75,26 +79,30 @@ class SoccerTeam:
 
 		return oBestPlayer
 
-	def FindPass(self, oPasser, oReceiver, vPassTarget, fPower, fMinPassingDistance):
+	def FindPass(self, oPasser, fPower, fMinPassingDistance):
+		oReceiver = None
+		vPassTarget = Vector2D()
+
 		fClosestToGoalSoFar = 99999999.0
-		vTarget = Vector2D()
+		vTarget = None
 
 		for curPlyr in self.Members():
 			if curPlyr != oPasser and Vec2DDistanceSq(oPasser.Pos(), curPlyr.Pos()) > fMinPassingDistance**2:
-				if self.GetBestPassToReceiver(oPasser, curPlyr, vTarget, fPower):
+				vTarget = self.GetBestPassToReceiver(oPasser, curPlyr, fPower)
+				if vTarget:
 					fDist2Goal = math.fabs(vTarget.GetX() - self.OpponentsGoal().Center().GetX())
 					if fDist2Goal < fClosestToGoalSoFar:
 						fClosestToGoalSoFar = fDist2Goal
 						oReceiver = curPlyr
-						vPassTarget = vTarget # 传引用
+						vPassTarget = vTarget
 
-		if oReceiver:
-			return True
-		else:
-			return False
+		if oReceiver == None:
+			return None
 
-	def GetBestPassToReceiver(self, oPasser, oReceiver, vPassTarget, fPower):
-		fTime = self.Pitch().Ball().TimeToCoverDistance(Pitch().Ball().Pos(),
+		return (oReceiver, vPassTarget)
+
+	def GetBestPassToReceiver(self, oPasser, oReceiver, fPower):
+		fTime = self.Pitch().Ball().TimeToCoverDistance(self.Pitch().Ball().Pos(),
 			                                            oReceiver.Pos(),
 			                                            fPower)
 		if fTime < 0:
@@ -105,23 +113,23 @@ class SoccerTeam:
 
 		vIp1 = Vector2D()
 		vIp2 = Vector2D()
-		GetTangentPoints(oReceiver.Pos(), fInterceptRange, Pitch().Ball().Pos(), vIp1, vIp2)
+		GetTangentPoints(oReceiver.Pos(), fInterceptRange, self.Pitch().Ball().Pos(), vIp1, vIp2)
 		
 		nNumPassesToTry = 3
 		lPasses = [vIp1, oReceiver.Pos(), vIp2]
 
 		fClosestSoFar = 99999999.0
-		bResult = False
+
+		vPassTarget = None
 		for nPass in xrange(nNumPassesToTry):
 			fDist = math.fabs(lPasses[nPass].GetX() - self.OpponentsGoal().Center().GetX())
 
 			if fDist < fClosestSoFar and self.Pitch().PlayingArea().Inside(lPasses[nPass]) and (
-			   isPassSafeFromAllOpponents(self.Pitch().Ball().Pos(), lPasses[nPass], oReceiver, fPower)):
+			   self.isPassSafeFromAllOpponents(self.Pitch().Ball().Pos(), lPasses[nPass], oReceiver, fPower)):
 				fClosestSoFar = fDist
 				vPassTarget = lPasses[nPass]
-				bResult = True
 
-		return bResult
+		return vPassTarget
 
 	def isPassSafeFromOpponent(self, vFrom, vTarget, oReceiver, oOpp, fPassingForce):
 		vToTarget = vTarget.Minus(vFrom)
@@ -156,7 +164,7 @@ class SoccerTeam:
 
 		return True
 
-	def CanShoot(self, vBallPos, fPower, vShotTarget):
+	def CanShoot(self, vBallPos, fPower):
 		nNumAttempts = Params.NUMATTEMPTSTOFINDVALIDSTRIKE
 		for i in xrange(nNumAttempts):
 			vShotTarget = self.OpponentsGoal().Center()
@@ -169,9 +177,9 @@ class SoccerTeam:
 
 			if fTime >= 0:
 				if self.isPassSafeFromAllOpponents(vBallPos, vShotTarget, None, fPower):
-					return True
+					return vShotTarget
 
-		return False
+		return None
 
 	def ReturnAllFieldPlayersToHome(self):
 		for oPlayer in self.m_lPlayers:
@@ -183,7 +191,52 @@ class SoccerTeam:
 					                            None)
 
 	def Render(self):
-		return
+		oScreen = SpriteRender.dRenderDict["Screen"]
+		
+		if self.Color() == Data.BLUE:
+			oBlueGoalKeeper = SpriteRender.dRenderDict["BlueGoalKeeper"]
+			oBlueFieldPlayer1 = SpriteRender.dRenderDict["BlueFieldPlayer1"]
+			oBlueFieldPlayer2 = SpriteRender.dRenderDict["BlueFieldPlayer2"]
+			oBlueFieldPlayer3 = SpriteRender.dRenderDict["BlueFieldPlayer3"]
+			oBlueFieldPlayer4 = SpriteRender.dRenderDict["BlueFieldPlayer4"]
+			'''
+			oBlueFieldPlayer1 = pygame.transform.rotate(oBlueFieldPlayer1, CalculateAngle(self.m_lPlayers[1].m_vLastHeading, 
+				                                        self.m_lPlayers[1].m_vHeading))
+			oBlueFieldPlayer2 = pygame.transform.rotate(oBlueFieldPlayer2, CalculateAngle(self.m_lPlayers[2].m_vLastHeading, 
+				                                        self.m_lPlayers[2].m_vHeading))
+			oBlueFieldPlayer3 = pygame.transform.rotate(oBlueFieldPlayer3, CalculateAngle(self.m_lPlayers[3].m_vLastHeading, 
+				                                        self.m_lPlayers[3].m_vHeading))
+			oBlueFieldPlayer4 = pygame.transform.rotate(oBlueFieldPlayer4, CalculateAngle(self.m_lPlayers[4].m_vLastHeading, 
+				                                        self.m_lPlayers[4].m_vHeading))
+			'''
+
+			oScreen.blit(oBlueGoalKeeper, self.m_lPlayers[0].Pos().TranslateToTuple())
+			oScreen.blit(oBlueFieldPlayer1, self.m_lPlayers[1].Pos().TranslateToTuple())
+			oScreen.blit(oBlueFieldPlayer2, self.m_lPlayers[2].Pos().TranslateToTuple())
+			oScreen.blit(oBlueFieldPlayer3, self.m_lPlayers[3].Pos().TranslateToTuple())
+			oScreen.blit(oBlueFieldPlayer4, self.m_lPlayers[4].Pos().TranslateToTuple())
+		else:
+			oRedGoalKeeper = SpriteRender.dRenderDict["RedGoalKeeper"]
+			oRedFieldPlayer1 = SpriteRender.dRenderDict["RedFieldPlayer1"]
+			oRedFieldPlayer2 = SpriteRender.dRenderDict["RedFieldPlayer2"]
+			oRedFieldPlayer3 = SpriteRender.dRenderDict["RedFieldPlayer3"]
+			oRedFieldPlayer4 = SpriteRender.dRenderDict["RedFieldPlayer4"]
+			'''
+			oRedFieldPlayer1 = pygame.transform.rotate(oRedFieldPlayer1, CalculateAngle(self.m_lPlayers[1].m_vLastHeading, 
+				                                        self.m_lPlayers[1].m_vHeading))
+			oRedFieldPlayer2 = pygame.transform.rotate(oRedFieldPlayer2, CalculateAngle(self.m_lPlayers[2].m_vLastHeading, 
+				                                        self.m_lPlayers[2].m_vHeading))
+			oRedFieldPlayer3 = pygame.transform.rotate(oRedFieldPlayer3, CalculateAngle(self.m_lPlayers[3].m_vLastHeading, 
+				                                        self.m_lPlayers[3].m_vHeading))
+			oRedFieldPlayer4 = pygame.transform.rotate(oRedFieldPlayer4, CalculateAngle(self.m_lPlayers[4].m_vLastHeading, 
+				                                        self.m_lPlayers[4].m_vHeading))
+			'''
+			oScreen.blit(oRedGoalKeeper, self.m_lPlayers[0].Pos().TranslateToTuple())
+			oScreen.blit(oRedFieldPlayer1, self.m_lPlayers[1].Pos().TranslateToTuple())
+			oScreen.blit(oRedFieldPlayer2, self.m_lPlayers[2].Pos().TranslateToTuple())
+			oScreen.blit(oRedFieldPlayer3, self.m_lPlayers[3].Pos().TranslateToTuple())
+			oScreen.blit(oRedFieldPlayer4, self.m_lPlayers[4].Pos().TranslateToTuple())
+
 
 	def CreatePlayers(self):
 		if self.Color() == Data.BLUE:
@@ -256,9 +309,8 @@ class SoccerTeam:
 		return None
 
 	def SetPlayerHomeRegion(self, nPlyr, nRegion):
-		if not (nPlyr >= 0 and nPlyr < len(self.m_lPlayers)):
-			print "player index wrong!\n"
-			return
+		assert nPlyr >= 0 and nPlyr < len(self.m_lPlayers)
+
 		self.m_lPlayers[nPlyr].SetHomeRegion(nRegion)
 
 	def UpdateTargetsOfWaitingPlayers(self):

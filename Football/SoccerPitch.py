@@ -9,6 +9,7 @@ from Football.SoccerBall import *
 from Football.SoccerTeam import *
 from misc.autolist import *
 from Football.TeamStates import *
+from Football.SpriteRender import *
 
 class SoccerPitch:
 	nTick = 0
@@ -33,13 +34,15 @@ class SoccerPitch:
 		                       Vector2D(self.m_oPlayingArea.Left(), nCyClient - (nCyClient - Params.GOALWIDTH) / 2),
 		                       Vector2D(1, 0)
 		                      )
+		# debug
+		# print "left():", self.m_oPlayingArea.Left(), "From:", (nCyClient - Params.GOALWIDTH) / 2, "To:", nCyClient - (nCyClient - Params.GOALWIDTH) / 2
 
 		self.m_oBlueGoal = Goal(Vector2D(self.m_oPlayingArea.Right(), (nCyClient - Params.GOALWIDTH) / 2),
 		                       Vector2D(self.m_oPlayingArea.Right(), nCyClient - (nCyClient - Params.GOALWIDTH) / 2),
 		                       Vector2D(-1, 0)
 		                      )
 
-		self.m_oBall = SoccerBall(Vector2D(self.m_nCxClient / 2.0, self.m_nCyClient / 2.0),
+		self.m_oBall = SoccerBall(Vector2D(self.m_nCxClient / 2.0 - Params.BALLSIZE, self.m_nCyClient / 2.0 - Params.BALLSIZE),
 							      Params.BALLSIZE,
 							      Params.BALLMASS,
 							      self.m_lWalls
@@ -66,23 +69,39 @@ class SoccerPitch:
 	def Update(self):
 		if self.m_bPaused:
 			return
-		self.m_oBall.Update()
 
+		self.Render() # 用Pygame画出图像
+
+		self.m_oBall.Update()
 		self.m_oRedTeam.Update()
 		self.m_oBlueTeam.Update()
 
 		if self.m_oBlueGoal.Scored(self.m_oBall) or self.m_oRedGoal.Scored(self.m_oBall):
 			self.m_bGameOn = False
-			self.m_oBall.PlaceAtPosition(Vector2D(self.m_nCxClient / 2.0, self.m_nCyClient / 2.0) )
+			self.m_oBall.PlaceAtPosition(Vector2D(self.m_nCxClient / 2.0 - Params.BALLSIZE, self.m_nCyClient / 2.0 - Params.BALLSIZE) )
+
+			self.m_oRedTeam.GetFSM().ChangeState(PrepareForKickOff())
+			self.m_oBlueTeam.GetFSM().ChangeState(PrepareForKickOff())
+
+		# 球出界自动回到中间
+		vTopLeft = Vector2D(20, 20)
+		vBottomRight = Vector2D(self.m_nCxClient - 20, self.m_nCyClient - 20)
+		if NotInsideRegion(self.m_oBall.Pos(), vTopLeft, vBottomRight):
+			self.m_bGameOn = False
+			self.m_oBall.PlaceAtPosition(Vector2D(self.m_nCxClient / 2.0 - Params.BALLSIZE, self.m_nCyClient / 2.0 - Params.BALLSIZE) )
 
 			self.m_oRedTeam.GetFSM().ChangeState(PrepareForKickOff())
 			self.m_oBlueTeam.GetFSM().ChangeState(PrepareForKickOff())
 
 		# debug
+		'''
 		lMembers =  AutoList.GetAllMembers()
 		for oMember in lMembers:
 			print "Player", oMember.ID(), ", Position:",
 			oMember.Pos().Print()
+		'''
+
+		# time.sleep(1)
 
 	def CreateRegions(self, fWidth, fHeight):
 		nIdx = len(self.m_lRegions) - 1
@@ -97,7 +116,9 @@ class SoccerPitch:
 				nIdx -= 1
 
 	def Render(self):
-		return
+		oScreen = SpriteRender.dRenderDict["Screen"]
+		oBackground = SpriteRender.dRenderDict["Background"]
+		oScreen.blit(oBackground, (0, 0))
 
 	def TogglePause(self):
 		self.m_bPaused = not self.m_bPaused

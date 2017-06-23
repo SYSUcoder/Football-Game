@@ -24,9 +24,8 @@ class BaseGameEntity:
 		self.SetID(nID)
 
 	def SetID(self, nVal):
-		if nVal < BaseGameEntity.nNextValidID:
-			print "Invalid ID!"
-			return
+		assert nVal >= BaseGameEntity.nNextValidID
+
 		self.m_nID = nVal
 		BaseGameEntity.nNextValidID = self.m_nID + 1
 

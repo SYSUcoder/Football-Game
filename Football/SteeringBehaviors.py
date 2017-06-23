@@ -22,7 +22,7 @@ class SteeringBehaviors:
 		fMagnitudeRemaining = self.m_oPlayer.MaxForce() - fMagnitudeSoFar
 
 		if fMagnitudeRemaining <= 0.0:
-			return False
+			return Vector2D(0, 0)
 
 		fMagnitudeToAdd = vForceToAdd.Length()
 
@@ -30,13 +30,14 @@ class SteeringBehaviors:
 			fMagnitudeToAdd = fMagnitudeRemaining
 
 		vSf = vSf.Plus(Vec2DNormalize(vForceToAdd).Multiply(fMagnitudeToAdd) )
-		return True
+		return vSf
 
 	def Calculate(self):
 		self.m_vSteeringForce.Zero()
 		self.m_vSteeringForce = self.SumForces()
-		self.m_vSteeringForce.Truncate(self.m_oPlayer.MaxForce())
 
+		self.m_vSteeringForce.Truncate(self.m_oPlayer.MaxForce())
+		
 		return self.m_vSteeringForce
 
 	def SumForces(self):
@@ -45,33 +46,38 @@ class SteeringBehaviors:
 		self.FindNeighbours()
 
 		if self.On(BehaviorType.SEPARATION):
+			# print "Player", self.m_oPlayer.ID(), "is execute Separation()"
 			vForce = vForce.Plus(self.Separation().Multiply(self.m_fMultSeparation) )
-
-			if not self.AccumulateForce(self.m_vSteeringForce, vForce):
+			self.m_vSteeringForce = self.AccumulateForce(self.m_vSteeringForce, vForce)
+			if not self.m_vSteeringForce:
 				return self.m_vSteeringForce
 
 		if self.On(BehaviorType.SEEK):
+			# print "Player", self.m_oPlayer.ID(), "is execute Seek()"
 			vForce = vForce.Plus(self.Seek(self.m_vTarget))
-
-			if not self.AccumulateForce(self.m_vSteeringForce, vForce):
+			self.m_vSteeringForce = self.AccumulateForce(self.m_vSteeringForce, vForce)
+			if not self.m_vSteeringForce:
 				return self.m_vSteeringForce
 
 		if self.On(BehaviorType.ARRIVE):
+			# print "Player", self.m_oPlayer.ID(), "is execute Arrive()"
 			vForce = vForce.Plus(self.Arrive(self.m_vTarget, Data.FAST))
-
-			if not self.AccumulateForce(self.m_vSteeringForce, vForce):
+			self.m_vSteeringForce = self.AccumulateForce(self.m_vSteeringForce, vForce)
+			if not self.m_vSteeringForce:
 				return self.m_vSteeringForce
 
 		if self.On(BehaviorType.PURSUIT):
+			# print "Player", self.m_oPlayer.ID(), "is execute Pursuit()"
 			vForce = vForce.Plus(self.Pursuit(self.m_oBall))
-
-			if not self.AccumulateForce(self.m_vSteeringForce, vForce):
+			self.m_vSteeringForce = self.AccumulateForce(self.m_vSteeringForce, vForce)
+			if not self.m_vSteeringForce:
 				return self.m_vSteeringForce
 
 		if self.On(BehaviorType.INTERPOSE):
+			# print "Player", self.m_oPlayer.ID(), "is execute Interpose()"
 			vForce = vForce.Plus(self.Interpose(self.m_oBall, self.m_vTarget, self.m_fInterposeDist))
-
-			if not self.AccumulateForce(self.m_vSteeringForce, vForce):
+			self.m_vSteeringForce = self.AccumulateForce(self.m_vSteeringForce, vForce)
+			if not self.m_vSteeringForce:
 				return self.m_vSteeringForce
 
 		return self.m_vSteeringForce

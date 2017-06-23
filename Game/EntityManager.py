@@ -11,27 +11,28 @@ class Singleton(object):
         return cls._instance
 
 class EntityManager(Singleton):
+	m_dEntityMap = {}
+
 	def __init__(self):
-		self.m_dEntityMap = {}
 		return
 
 	def GetEntityFromID(self, nID):
-		bIsHasKey = self.m_dEntityMap.has_key(nID)
+		bIsHasKey = EntityManager.m_dEntityMap.has_key(nID)
 		if bIsHasKey:
-			return self.m_dEntityMap[nID]
+			return EntityManager.m_dEntityMap[nID]
 		else:
 			print "This id is not register\n"
 			return None
 
 	def RemoveEntity(self, oEntity):
-		bIsHasKey = self.m_dEntityMap.has_key(oEntity.ID())
+		bIsHasKey = EntityManager.m_dEntityMap.has_key(oEntity.ID())
 		if bIsHasKey:
-			del self.m_dEntityMap[oEntity.ID()]
+			del EntityManager.m_dEntityMap[oEntity.ID()]
 		else:
 			print "This entity is not in the dict\n"
 			
 	def RegisterEntity(self, oNewEntity):
-		self.m_dEntityMap[oNewEntity.ID()] = oNewEntity
+		EntityManager.m_dEntityMap[oNewEntity.ID()] = oNewEntity
 
 	def Reset(self):
-		self.m_dEntityMap.clear()
+		EntityManager.m_dEntityMap.clear()

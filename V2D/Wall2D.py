@@ -5,6 +5,7 @@ from V2D.Vector2D import *
 
 class Wall2D:
 	def __init__(self, vA = None, vB = None, vN = None):
+		assert not( vA == None or vB == None )
 		self.m_vA = copy.deepcopy(vA)
 		self.m_vB = copy.deepcopy(vB)
 		if vN == None:

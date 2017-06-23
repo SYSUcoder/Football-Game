@@ -7,6 +7,7 @@ from Data import *
 from Messaging.MessageDispatcher import *
 from V2D.Vector2D import *
 from V2D.Transformations import *
+from Football.SoccerBall import *
 
 class Singleton(object):
 	# 单例模式
@@ -54,6 +55,12 @@ class GlobalPlayerState(State, Singleton):
 				print "Player", oPlayer.ID(), "cannot make requested pass <cannot kick ball>\n"
 				return True
 
+			'''
+			# debug
+			print "======================="
+			print "Receiver:", oReceiver.ID(), "Position:", oReceiver.Pos(), "Ball's Pos:", oPlayer.Ball().Pos()
+			print "======================="
+			'''
 			oPlayer.Ball().Kick(oReceiver.Pos().Minus(oPlayer.Ball().Pos()), Params.MAXPASSINGFORCE)
 
 			print "Player", oPlayer.ID(), "Passed ball to requesting player\n"
@@ -79,9 +86,11 @@ class ChaseBall(State, Singleton):
 	def Enter(self, oPlayer):
 		oPlayer.Steering().SeekOn()
 
-		print "Player", oPlayer.ID(), "enters chase state\n"
+		print "Player", oPlayer.ID(), "enters chase state"
 
 	def Execute(self, oPlayer):
+		print "Player", oPlayer.ID(), "is chasing ball"
+
 		if oPlayer.BallWithinKickingRange():
 			oPlayer.GetFSM().ChangeState(KickBall())
 			return
@@ -178,12 +187,14 @@ class Wait(State, Singleton):
 		return
 
 	def Enter(self, oPlayer):
-		print "Player", oPlayer.ID(), "enters wait state\n"
+		print "Player", oPlayer.ID(), "enters wait state"
 
 		if not oPlayer.Pitch().GameOn():
 			oPlayer.Steering().SetTarget(oPlayer.HomeRegion().Center())
 
 	def Execute(self, oPlayer):
+		# print "Player", oPlayer.ID(), "is waiting"
+
 		if not oPlayer.AtTarget():
 			oPlayer.Steering().ArriveOn()
 			return
@@ -219,11 +230,12 @@ class KickBall(State, Singleton):
 		return
 
 	def Enter(self, oPlayer):
+		assert not oPlayer == None
 		oPlayer.Team().SetControllingPlayer(oPlayer)
 		if not oPlayer.isReadyForNextKick():
 			oPlayer.GetFSM().ChangeState(ChaseBall())
 
-		print "Player", oPlayer.ID(), "enters kick state\n"
+		print "Player", oPlayer.ID(), "enters kick state"
 
 	def Execute(self, oPlayer):
 		vToBall = oPlayer.Ball().Pos().Minus(oPlayer.Pos())
@@ -238,11 +250,10 @@ class KickBall(State, Singleton):
 			oPlayer.GetFSM().ChangeState(ChaseBall())
 			return
 
-		vBallTarget = Vector2D()
 		fPower = Params.MAXSHOOTINGFORCE * fDot
-
-		if oPlayer.Team().CanShoot(oPlayer.Ball().Pos(), fPower, vBallTarget) or (
-		   random.random() < Params.CHANCEPLAYERATTEMPTSPOTSHOT):
+		vBallTarget = oPlayer.Team().CanShoot(oPlayer.Ball().Pos(), fPower)
+		if vBallTarget:
+		# if vBallTarget or (random.random() < Params.CHANCEPLAYERATTEMPTSPOTSHOT):
 			print "Player", oPlayer.ID(), "attempts a shot at", vBallTarget
 
 			vBallTarget = AddNoiseToKick(oPlayer.Ball().Pos(), vBallTarget)
@@ -253,20 +264,29 @@ class KickBall(State, Singleton):
 			oPlayer.FindSupport()
 			return
 
-		oReceiver = None
 		fPower = Params.MAXPASSINGFORCE * fDot
+		assert fPower >= 0
 
-		if oPlayer.isThreatened() and oPlayer.Team().FindPass(oPlayer,
-															  oReceiver,
-															  vBallTarget,
-															  fPower,
-															  Params.MINPASSDIST):
+		if vBallTarget == None:
+			vBallTarget = Vector2D()
+
+		tReceiverAndTarget = oPlayer.Team().FindPass(oPlayer, fPower, Params.MINPASSDIST)
+		if oPlayer.isThreatened() and tReceiverAndTarget:
+			oReceiver = tReceiverAndTarget[0]
+			vBallTarget = tReceiverAndTarget[1]
+
 			vBallTarget = AddNoiseToKick(oPlayer.Ball().Pos(), vBallTarget)
+			'''
+			# debug
+			print "======================="
+			print "Receiver' Pos:", oReceiver.Pos().TranslateToTuple(), "Ball's Pos:", oPlayer.Ball().Pos().TranslateToTuple(), "balltarget:", vBallTarget.TranslateToTuple()
+			print "======================="
+			'''
 			vKickDirection = vBallTarget.Minus(oPlayer.Ball().Pos())
 			oPlayer.Ball().Kick(vKickDirection, fPower)
 
 			print "Player", oPlayer.ID(), "passes the ball with force", fPower,
-			print "to player", oReceiver.ID(), "Target is", vBallTarget
+			print "to player", oReceiver.ID(), "Target is", vBallTarget.TranslateToTuple()
 
 			MessageDispatcher().DispatchMsg(MessageData.SEND_MSG_IMMEDIATELY,
 											oPlayer.ID(),
@@ -301,7 +321,7 @@ class Dribble(State, Singleton):
 			vDirection = oPlayer.Heading()
 			fAngle = Data.PI / 4 * -1 * oPlayer.Team().HomeGoal().Facing().Sign(oPlayer.Heading())
 
-			Vec2DRotateAroundOrigin(vDirection, fAngle)
+			vDirection = Vec2DRotateAroundOrigin(vDirection, fAngle)
 			fKickingForce = 0.8
 
 			oPlayer.Ball().Kick(vDirection, fKickingForce)

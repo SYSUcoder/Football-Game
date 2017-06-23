@@ -62,9 +62,9 @@ class PlayerBase(MovingEntity, AutoList):
 
 	def isThreatened(self):
 		for oCurOpp in self.Team().Opponents().Members():
-			if self.PositionInFrontOfPlayer(oCurOpp.Pos() and (
+			if self.PositionInFrontOfPlayer(oCurOpp.Pos()) and (
 				                            Vec2DDistanceSq(self.Pos(), oCurOpp.Pos())
-				                            < Params.PLAYERCOMFORTZONE**2) ):
+				                            < Params.PLAYERCOMFORTZONE**2):
 				return True
 
 		return False
@@ -104,7 +104,6 @@ class PlayerBase(MovingEntity, AutoList):
 		return math.fabs(self.Pos().GetX() - self.Team().HomeGoal().Center().GetX())
 
 	def isControllingPlayer(self):
-		# 返回引用，估计有bug
 		return self.Team().ControllingPlayer() == self
 
 	def BallWithinKeeperRange(self):
@@ -114,6 +113,7 @@ class PlayerBase(MovingEntity, AutoList):
 		return Vec2DDistanceSq(self.Pos(), self.Ball().Pos()) < Params.BALLWITHINRECEIVINGRANGE**2
 
 	def BallWithinKickingRange(self):
+		print "distance between player and ball", Vec2DDistanceSq(self.Ball().Pos(), self.Pos())
 		return Vec2DDistanceSq(self.Ball().Pos(), self.Pos()) < Params.PLAYERKICKINGDISTANCE**2
 
 	def InHomeRegion(self):

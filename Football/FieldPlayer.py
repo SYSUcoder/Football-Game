@@ -10,6 +10,7 @@ from V2D.Transformations import *
 from misc.autolist import *
 from Football.FieldPlayerStates import *
 from Game.EntityFunctionTemplates import *
+from V2D.Vector2D import *
 
 class FieldPlayer(PlayerBase):
 	def __init__(self, oHomeTeam, nHomeRegion, oStartState, vHeading, vVelocity,
@@ -38,8 +39,8 @@ class FieldPlayer(PlayerBase):
 			self.m_vVelocity = self.m_vVelocity.Multiply(fBrakingRate)
 
 		fTurningForce = self.m_oSteering.SideComponent()
-		Clamp(fTurningForce, -Params.PLAYERMAXTURNRATE, Params.PLAYERMAXTURNRATE)
-		Vec2DRotateAroundOrigin(self.m_vHeading, fTurningForce)
+		fTurningForce =  Clamp(fTurningForce, -Params.PLAYERMAXTURNRATE, Params.PLAYERMAXTURNRATE)
+		self.m_vHeading = Vec2DRotateAroundOrigin(self.m_vHeading, fTurningForce)
 		self.m_vVelocity = self.m_vHeading.Multiply(self.m_vVelocity.Length())
 		self.m_vSide = self.m_vHeading.Perp()
 
@@ -52,6 +53,10 @@ class FieldPlayer(PlayerBase):
 
 		if Params.BNONPENETRATIONCONSTRAINT:
 			EnforceNonPenetrationContraint(self, AutoList.GetAllMembers())
+
+		# debug
+		# self.m_vPosition = Vector2D(1, 1)
+		print "Player", self.ID(), "Location:", self.Pos().TranslateToTuple()
 
 	def HandleMessage(self, tMsg):
 		return self.m_oStateMachine.HandleMessage(tMsg)
